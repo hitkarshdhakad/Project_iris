@@ -94,8 +94,8 @@ while True:
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgb)
 
-    gesture      = "NONE"
-    extra_info   = ""
+    gesture       = "NONE"
+    extra_info    = ""
     hold_progress = 0.0
 
     if result.multi_hand_landmarks:
@@ -119,8 +119,8 @@ while True:
 
             elif mode == config.MODE_VOLUME:
                 volume_ctrl.update(hand_landmarks, w, h)
-                vol_pct    = volume_ctrl.get_volume_percentage(hand_landmarks, w, h)
-                extra_info = f"Volume: {vol_pct}%"
+                volume_ctrl.draw_wheel(frame, hand_landmarks, w, h)
+                extra_info = f"Volume: {int(volume_ctrl.current_volume)}%"
 
             elif mode == config.MODE_APP:
                 launched = app_launch.update(gesture)
@@ -128,8 +128,9 @@ while True:
                     extra_info = f"Opened: {launched}"
 
     else:
-        # No hand detected
-        mode = mode_mgr.get_mode()
+        # No hand detected — reset volume rotation
+        if mode_mgr.get_mode() == config.MODE_VOLUME:
+            volume_ctrl.reset_rotation()
 
     # Draw HUD
     mode = mode_mgr.get_mode()
@@ -144,4 +145,3 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 print("Project IRIS stopped")
-
